@@ -1,17 +1,17 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from transformers import GPT2TokenizerFast
 import random
 
-# 1. Toy vocabulary and encoding/decoding
-VOCAB = ["hello", "world", "I", "am", "a", "bot", "how", "are", "you", "?"]
-word2idx = {w: i for i, w in enumerate(VOCAB)}
-idx2word = {i: w for i, w in enumerate(VOCAB)}
+# 1. Tokenizer and dynamic vocabulary
+TOKENIZER_NAME = "gpt2"
+tokenizer = GPT2TokenizerFast.from_pretrained(TOKENIZER_NAME)
+VOCAB_SIZE = tokenizer.vocab_size
 
 # 2. Hyperparameters
 EMBED_DIM = 8
 HIDDEN_DIM = 16
-VOCAB_SIZE = len(VOCAB)
 
 # 3. Model definition
 class SimpleLLM(nn.Module):
@@ -61,20 +61,21 @@ class SimpleLLM(nn.Module):
 
 # 4. Utility functions
 def encode(sentence):
-    # Simple whitespace split, map to indices, unknowns to 0
-    return torch.tensor([word2idx.get(w, 0) for w in sentence.strip().split()], dtype=torch.long)
+    # Use the Hugging Face tokenizer
+    return torch.tensor(tokenizer.encode(sentence, add_special_tokens=False), dtype=torch.long)
 
 def decode(idx):
-    return idx2word.get(idx, "<unk>")
+    # Decode a single token id to string
+    return tokenizer.decode([idx])
 
 # 5. Main demo
 def main():
     model = SimpleLLM()
     model.eval()
-    sentence = input(f"Enter a sentence using words from the vocab {VOCAB}:\n> ")
+    sentence = input(f"Enter a sentence (any English text):\n> ")
     input_ids = encode(sentence)
     print("\nInput token indices:", input_ids)
-    print("Input words:", [decode(idx.item()) for idx in input_ids])
+    print("Input tokens:", [decode(idx.item()) for idx in input_ids])
     # Prefill: process all tokens so far
     K, V, embeds = model.prefill(input_ids)
     # Decode: generate one new token
@@ -82,7 +83,7 @@ def main():
     probs = model.decode(input_ids, K, V)
     # Sample next word
     next_token = torch.multinomial(probs[0], num_samples=1).item()
-    print(f"\nPredicted next word: {decode(next_token)} (token {next_token})")
+    print(f"\nPredicted next token: {decode(next_token)} (token {next_token})")
 
 if __name__ == "__main__":
     main() 
