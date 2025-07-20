@@ -13,7 +13,7 @@ This project simulates LLM inference with:
 
 - Single-head self-attention mechanism
 - Simple feedforward neural network
-- Toy vocabulary with 10 common words
+- **Unrestricted vocabulary:** Uses the Hugging Face GPT-2 tokenizer, so you can input any English text
 - End-to-end inference simulation
 - Detailed step-by-step output showing all intermediate computations
 
@@ -25,15 +25,15 @@ Input → Embedding → Q/K/V Projection → Attention → Feedforward → Outpu
 
 - **Embedding Dimension**: 8
 - **Hidden Dimension**: 16
-- **Vocabulary Size**: 10 words
+- **Vocabulary**: GPT-2 tokenizer (50,257 tokens)
 - **Attention**: Single head with scaled dot-product attention
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
-cd llm-inference-demo
+git clone https://github.com/rahulrathiai/llm-inference.git
+cd llm-inference
 ```
 
 2. Install dependencies:
@@ -48,55 +48,40 @@ Run the demo:
 python llm_demo.py
 ```
 
-When prompted, enter a sentence using words from the vocabulary:
-```
-['hello', 'world', 'I', 'am', 'a', 'bot', 'how', 'are', 'you', '?']
-```
+When prompted, enter any English sentence. The model will tokenize your input using the GPT-2 tokenizer and process it through the demo LLM.
 
-Example input: `hello how are you`
+Example input: `hello how are you?`
 
 The program will:
-1. Encode your input into token indices
+1. Encode your input into token indices using the GPT-2 tokenizer
 2. Run the prefill phase (compute embeddings, Q, K, V matrices)
 3. Run the decode phase (attention, feedforward, output probabilities)
-4. Sample and display the predicted next word
+4. Sample and display the predicted next token
 
 ## Output Example
 
 ```
-Input token indices: tensor([0, 6, 7, 8])
-Input words: ['hello', 'how', 'are', 'you']
+Input token indices: tensor([31373, 703, 389, 345, 30])
+Input tokens: ['hello', ' how', ' are', ' you', '?']
 Embeddings:
- tensor([[ 0.5065,  0.7691, -1.7338,  0.3456, -1.0425,  0.4642,  0.1979, -0.5906],
-        [ 0.8596, -0.0945,  0.9294, -0.4293,  0.2579,  1.1823, -0.0632,  0.3521],
-        [-1.4774, -0.1556,  0.9664,  1.4730, -0.1974,  0.5134,  0.4906,  2.1285],
-        [-0.1234,  0.5678, -0.9012,  0.3456,  0.7890, -0.1234,  0.5678, -0.9012]])
+ tensor([...])
 Q:
- tensor([[ 0.9160, -0.3601,  0.2585,  0.7262,  0.1138, -0.2966,  0.4466,  0.7501],
-        [ 0.3390, -0.1787,  0.2326, -0.1370, -0.8606, -0.1327,  0.1581, -0.2716],
-        [-0.6426,  0.5626, -0.3028, -1.1961, -0.9312,  0.1524, -0.2801,  0.0103],
-        [-0.2345,  0.6789, -0.1234,  0.5678,  0.9012, -0.3456,  0.7890, -0.1234]])
+ tensor([...])
 K:
- tensor([[-1.0145,  0.6606, -0.0039, -0.4635,  0.0211,  0.2599, -0.7471, -0.6178],
-        [ 0.2920,  0.4204, -0.1322,  0.2247,  0.4344, -0.2875,  0.6534, -0.1016],
-        [ 0.8725, -0.5641,  0.7861,  0.3693, -0.7011,  0.2237,  1.0027,  0.5880],
-        [-0.3456,  0.7890, -0.2345,  0.6789,  0.1234, -0.5678,  0.9012, -0.3456]])
+ tensor([...])
 V:
- tensor([[ 0.2800, -0.1219,  0.3365, -0.6340, -0.5509, -0.5850, -0.3845,  0.2248],
-        [-0.0075, -0.3711,  0.1035,  0.6505, -0.4625, -0.2684, -0.0703,  0.1754],
-        [-0.4775,  0.6121,  0.0718,  0.3639,  0.3096, -0.3498,  0.3448, -1.5899],
-        [-0.1234,  0.5678, -0.9012,  0.3456,  0.7890, -0.1234,  0.5678, -0.9012]])
+ tensor([...])
 
 --- Decoding next token ---
-[Decode] Embedding for last token: tensor([[-0.1234,  0.5678, -0.9012,  0.3456,  0.7890, -0.1234,  0.5678, -0.9012]])
-[Decode] Q for last token: tensor([[-0.2345,  0.6789, -0.1234,  0.5678,  0.9012, -0.3456,  0.7890, -0.1234]])
-[Decode] Attention scores: tensor([[ 0.1234, -0.5678,  0.9012, -0.3456]])
-[Decode] Attention weights: tensor([[0.2345, 0.1234, 0.4567, 0.1854]])
-[Decode] Attention output: tensor([[-0.1234,  0.5678, -0.9012,  0.3456,  0.7890, -0.1234,  0.5678, -0.9012]])
-[Decode] Logits: tensor([[ 0.1234, -0.5678,  0.9012, -0.3456,  0.7890, -0.1234,  0.5678, -0.9012,  0.2345, -0.6789]])
-[Decode] Probabilities: tensor([[0.0925, 0.0845, 0.1220, 0.1152, 0.0931, 0.1141, 0.0942, 0.0872, 0.1119, 0.0854]])
+[Decode] Embedding for last token: tensor([...])
+[Decode] Q for last token: tensor([...])
+[Decode] Attention scores: tensor([...])
+[Decode] Attention weights: tensor([...])
+[Decode] Attention output: tensor([...])
+[Decode] Logits: tensor([...])
+[Decode] Probabilities: tensor([...])
 
-Predicted next word: ? (token 9)
+Predicted next token:  (token 220)
 ```
 
 ## Technical Details
@@ -123,11 +108,12 @@ Predicted next word: ? (token 9)
 
 ## Future Enhancements
 
+- Use real LLM weights from a small open-source model (e.g., GPT-2, TinyLlama)
 - Multi-head attention
 - Positional encoding
 - Layer normalization
 - Multiple transformer layers
-- Larger vocabulary and embedding dimensions
+- Larger embedding dimensions
 - Training capabilities
 - Beam search decoding
 
